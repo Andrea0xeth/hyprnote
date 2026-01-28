@@ -37,6 +37,8 @@ export const isTranscriptView = (
 export const isAttachmentsView = (
   view: EditorView,
 ): view is { type: "attachments" } => view.type === "attachments";
+export const isAskView = (view: EditorView): view is { type: "ask" } =>
+  view.type === "ask";
 
 type BaseTab = {
   active: boolean;

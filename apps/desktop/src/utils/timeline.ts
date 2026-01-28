@@ -54,6 +54,50 @@ export type TimelineBucket = {
   items: TimelineItem[];
 };
 
+function getItemTimestamp(item: TimelineItem): Date | null {
+  const raw =
+    item.type === "event" ? item.data.started_at : item.data.created_at;
+  return safeParseDate(raw);
+}
+
+function getItemTitleKey(item: TimelineItem): string {
+  const title = item.data.title ?? "";
+  return String(title).trim().toLowerCase();
+}
+
+function getItemTimeKey(item: TimelineItem): string {
+  const date = getItemTimestamp(item);
+  if (!date) {
+    return "";
+  }
+  return safeFormat(date, "yyyy-MM-dd HH:mm");
+}
+
+function isConsecutiveDuplicate(prev: TimelineItem, next: TimelineItem): boolean {
+  const prevTime = getItemTimeKey(prev);
+  const nextTime = getItemTimeKey(next);
+  if (!prevTime || !nextTime) {
+    return false;
+  }
+  return (
+    prevTime === nextTime && getItemTitleKey(prev) === getItemTitleKey(next)
+  );
+}
+
+function dedupeConsecutiveItems(items: TimelineItem[]): TimelineItem[] {
+  if (items.length <= 1) {
+    return items;
+  }
+  const result: TimelineItem[] = [];
+  items.forEach((item) => {
+    const previous = result[result.length - 1];
+    if (!previous || !isConsecutiveDuplicate(previous, item)) {
+      result.push(item);
+    }
+  });
+  return result;
+}
+
 export function getBucketInfo(date: Date): {
   label: string;
   sortKey: number;
@@ -242,12 +286,14 @@ export function buildTimelineBuckets({
     return timeBValue - timeAValue;
   });
 
+  const dedupedItems = dedupeConsecutiveItems(items);
+
   const bucketMap = new Map<
     string,
     { sortKey: number; precision: TimelinePrecision; items: TimelineItem[] }
   >();
 
-  items.forEach((item) => {
+  dedupedItems.forEach((item) => {
     const itemDate = new Date(item.date + "T00:00:00");
     const bucket = getBucketInfo(itemDate);
 

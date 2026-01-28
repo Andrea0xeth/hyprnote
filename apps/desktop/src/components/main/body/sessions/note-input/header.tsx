@@ -616,7 +616,11 @@ export function useEditorTabs({
   );
 
   if (sessionMode === "active" || sessionMode === "running_batch") {
-    const tabs: EditorView[] = [{ type: "raw" }, { type: "transcript" }];
+    const tabs: EditorView[] = [
+      { type: "raw" },
+      { type: "transcript" },
+      { type: "ask" },
+    ];
     if (hasAttachments) {
       tabs.push({ type: "attachments" });
     }
@@ -632,6 +636,7 @@ export function useEditorTabs({
       ...enhancedTabs,
       { type: "raw" },
       { type: "transcript" },
+      { type: "ask" },
     ];
     if (hasAttachments) {
       tabs.push({ type: "attachments" });
@@ -639,7 +644,7 @@ export function useEditorTabs({
     return tabs;
   }
 
-  const tabs: EditorView[] = [{ type: "raw" }];
+  const tabs: EditorView[] = [{ type: "raw" }, { type: "ask" }];
   if (hasAttachments) {
     tabs.push({ type: "attachments" });
   }
@@ -658,6 +663,9 @@ function labelForEditorView(view: EditorView): string {
   }
   if (view.type === "attachments") {
     return "Attachments";
+  }
+  if (view.type === "ask") {
+    return "Ask";
   }
   return "";
 }

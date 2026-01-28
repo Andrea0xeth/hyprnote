@@ -25,6 +25,7 @@ import { type EditorView } from "../../../../../store/zustand/tabs/schema";
 import { useCaretNearBottom } from "../caret-position-context";
 import { useCurrentNoteTab } from "../shared";
 import { type Attachment, Attachments } from "./attachments";
+import { AskTab } from "./ask";
 import { Enhanced } from "./enhanced";
 import { Header, useAttachments, useEditorTabs } from "./header";
 import { RawEditor } from "./raw";
@@ -92,7 +93,11 @@ export const NoteInput = forwardRef<
   });
 
   useEffect(() => {
-    if (currentTab.type === "transcript" || currentTab.type === "attachments") {
+    if (
+      currentTab.type === "transcript" ||
+      currentTab.type === "attachments" ||
+      currentTab.type === "ask"
+    ) {
       internalEditorRef.current = { editor: null };
       setEditor(null);
     } else if (currentTab.type === "raw" && isMeetingInProgress) {
@@ -206,11 +211,17 @@ export const NoteInput = forwardRef<
     editor,
     container,
     enabled:
-      currentTab.type !== "transcript" && currentTab.type !== "attachments",
+      currentTab.type !== "transcript" &&
+      currentTab.type !== "attachments" &&
+      currentTab.type !== "ask",
   });
 
   const handleContainerClick = () => {
-    if (currentTab.type !== "transcript" && currentTab.type !== "attachments") {
+    if (
+      currentTab.type !== "transcript" &&
+      currentTab.type !== "attachments" &&
+      currentTab.type !== "ask"
+    ) {
       internalEditorRef.current?.editor?.commands.focus();
     }
   };
@@ -234,7 +245,8 @@ export const NoteInput = forwardRef<
             fadeRef.current = node;
             if (
               currentTab.type !== "transcript" &&
-              currentTab.type !== "attachments"
+              currentTab.type !== "attachments" &&
+              currentTab.type !== "ask"
             ) {
               scrollRef.current = node;
               setContainer(node);
@@ -246,7 +258,7 @@ export const NoteInput = forwardRef<
           onClick={handleContainerClick}
           className={cn([
             "h-full px-3",
-            currentTab.type === "transcript"
+            currentTab.type === "transcript" || currentTab.type === "ask"
               ? "overflow-hidden"
               : ["overflow-auto", "pt-2", "pb-6"],
           ])}
@@ -276,6 +288,7 @@ export const NoteInput = forwardRef<
           {currentTab.type === "attachments" && (
             <AttachmentsContent sessionId={sessionId} />
           )}
+          {currentTab.type === "ask" && <AskTab sessionId={sessionId} />}
         </div>
         {!atStart && <ScrollFadeOverlay position="top" />}
         {!atEnd && <ScrollFadeOverlay position="bottom" />}

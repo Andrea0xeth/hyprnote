@@ -1,4 +1,4 @@
-import { FolderIcon } from "lucide-react";
+import { FolderIcon, PlusIcon } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import {
@@ -54,17 +54,11 @@ export function SearchableFolderDropdown({
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-50 p-0">
-        {Object.keys(folders).length ? (
-          <SearchableFolderContent
-            folders={folders}
-            onSelectFolder={handleSelectFolder}
-            setOpen={setOpen}
-          />
-        ) : (
-          <div className="py-6 text-center text-sm text-muted-foreground">
-            No folders available
-          </div>
-        )}
+        <SearchableFolderContent
+          folders={folders}
+          onSelectFolder={handleSelectFolder}
+          setOpen={setOpen}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -83,17 +77,11 @@ export function SearchableFolderSubmenuContent({
 
   return (
     <DropdownMenuSubContent className="w-50 p-0">
-      {Object.keys(folders).length ? (
-        <SearchableFolderContent
-          folders={folders}
-          onSelectFolder={handleSelectFolder}
-          setOpen={setOpen}
-        />
-      ) : (
-        <div className="py-6 text-center text-sm text-muted-foreground">
-          No folders available
-        </div>
-      )}
+      <SearchableFolderContent
+        folders={folders}
+        onSelectFolder={handleSelectFolder}
+        setOpen={setOpen}
+      />
     </DropdownMenuSubContent>
   );
 }
@@ -112,11 +100,26 @@ function SearchableFolderContent({
     setOpen?.(false);
   };
 
+  const handleCreateFolder = async () => {
+    const input = window.prompt("New folder name");
+    const folderId = normalizeFolderPath(input ?? "");
+    if (!folderId) {
+      return;
+    }
+    await handleSelect(folderId);
+  };
+
   return (
     <Command>
       <CommandInput placeholder="Search folders..." autoFocus className="h-9" />
       <CommandList>
         <CommandEmpty>No folders found.</CommandEmpty>
+        <CommandGroup>
+          <CommandItem value="__create_folder__" onSelect={handleCreateFolder}>
+            <PlusIcon />
+            Create new folder
+          </CommandItem>
+        </CommandGroup>
         <CommandGroup>
           {Object.entries(folders).map(([folderId, folder]) => (
             <CommandItem
@@ -132,6 +135,18 @@ function SearchableFolderContent({
       </CommandList>
     </Command>
   );
+}
+
+function normalizeFolderPath(input: string): string | null {
+  const normalized = input
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/\/{2,}/g, "/")
+    .replace(/^\/|\/$/g, "");
+  if (!normalized) {
+    return null;
+  }
+  return normalized;
 }
 
 function useMoveSessionToFolder(sessionId: string) {

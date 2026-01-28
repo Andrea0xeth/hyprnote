@@ -16,6 +16,7 @@ import "@hypr/ui/globals.css";
 import { ErrorComponent, NotFoundComponent } from "./components/control";
 import { EventListeners } from "./components/event-listeners";
 import { TaskManager } from "./components/task-manager";
+import { ThemeSync } from "./components/theme-sync";
 import { createToolRegistry } from "./contexts/tool-registry/core";
 import { env } from "./env";
 import { initExtensionGlobals } from "./extension-globals";
@@ -113,6 +114,7 @@ function AppWithTiny() {
         <TinyBaseProvider>
           <StoreComponent />
           <SettingsStoreComponent />
+          <ThemeSync />
           <App />
           {!isIframeContext && <TaskManager />}
           {!isIframeContext && <EventListeners />}
